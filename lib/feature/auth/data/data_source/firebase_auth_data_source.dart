@@ -72,14 +72,35 @@ class FirebaseAuthDataSourceImp implements FirebaseAuthDataSource {
   @override
   Future<SocialUserModel> signInWithFacebook() async {
     try {
-      final FacebookAuthProvider facebookProvider = FacebookAuthProvider();
-
-      facebookProvider.addScope('email');
-      facebookProvider.addScope('public_profile');
-
-      final UserCredential userCredential = await _firebaseAuth.signInWithProvider(
-        facebookProvider,
+      final LoginResult result = await _facebookAuth.login(
+        permissions: ['email', 'public_profile'],
       );
+
+      if (result.status == LoginStatus.cancelled) {
+        throw ServerFailure(
+          error: 'Facebook sign in cancelled',
+          message: 'Facebook sign in was cancelled',
+        );
+      }
+
+      if (result.status == LoginStatus.failed) {
+        throw ServerFailure(
+          error: result.message ?? 'Facebook failed',
+          message: result.message ?? 'Facebook sign in failed',
+        );
+      }
+
+      final AccessToken? accessToken = result.accessToken;
+      if (accessToken == null) {
+        throw ServerFailure(
+          error: 'Facebook access token null',
+          message: 'Failed to get Facebook access token',
+        );
+      }
+
+      final credential = FacebookAuthProvider.credential(accessToken.tokenString);
+
+      final UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
       final User? user = userCredential.user;
 
       if (user == null) {
@@ -89,24 +110,14 @@ class FirebaseAuthDataSourceImp implements FirebaseAuthDataSource {
         );
       }
 
-      final accessToken = userCredential.credential?.accessToken;
-
       return SocialUserModel(
         id: user.uid,
         email: user.email,
         displayName: user.displayName,
         photoUrl: user.photoURL,
-        accessToken: accessToken,
+        accessToken: accessToken.tokenString,
         provider: SocialProvider.facebook,
       );
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'popup-closed-by-user' || e.code == 'user-cancelled') {
-        throw ServerFailure(
-          error: 'Facebook sign in cancelled',
-          message: 'Facebook sign in was cancelled by user',
-        );
-      }
-      throw ServerFailure(error: e.code, message: e.message ?? 'Facebook sign in failed');
     } catch (e) {
       if (e is Failure) rethrow;
       throw ServerFailure(error: e, message: 'Facebook sign in failed: ${e.toString()}');
