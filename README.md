@@ -1,4 +1,7 @@
 # EasACC Task
+<img width="445" height="908" alt="image" src="https://github.com/user-attachments/assets/40820dce-6d86-45ee-9bd3-ad24fe77244b" />
+<img width="434" height="906" alt="image" src="https://github.com/user-attachments/assets/6b4d7c88-20e0-42ef-9501-442bd3448883" />
+<img width="438" height="919" alt="image" src="https://github.com/user-attachments/assets/cf75fdbe-d3fb-4183-8134-7de072d1fd1b" />
 
 ## 📋 Installation
 
