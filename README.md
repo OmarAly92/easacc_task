@@ -1,8 +1,6 @@
 # EasACC Task
 
-A Flutter application with secure data encryption capabilities.
-
-## 📋 Prerequisites
+## 📋 Installation
 
 Before you begin, ensure you have the following installed:
 - Flutter SDK (3.0 or higher recommended)
